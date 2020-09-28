@@ -1,0 +1,16 @@
+{
+  "name": "start-node",
+  "version": "1.0.0",
+  "description": "start to learn node.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "author": "mahdie ahmadi",
+  "license": "ISC",
+  "dependencies": {
+    "node-persist": "0.0.11",
+    "yargs": "^16.0.3"
+  }
+}
