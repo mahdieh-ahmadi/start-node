@@ -21,6 +21,12 @@ const argv = require('yargs')
             alias : 'p',
             description : 'your password is here',
             type : 'string'
+        },
+        masterPass:{
+            demand : true,
+            alias : 'm',
+            description : 'master password is here',
+            type : 'string'
         }
     }).help('help')
 })
@@ -32,10 +38,10 @@ const argv = require('yargs')
             description : 'enter the name of accont for find accont details',
             type : 'string'
         },
-        password:{
+        masterPass:{
             demand : true,
-            alias : 'p',
-            description : 'enter the password to get accont',
+            alias : 'm',
+            description : 'master password is here',
             type : 'string'
         }
     })
@@ -46,20 +52,35 @@ const argv = require('yargs')
 let command = argv._[0];
 storage.initSync();
 
-const cryptMassage = crypto.AES.encrypt(argv.password , argv.password).toString()
-
-const setAcconts = accont => {
+const fetchacconts = pass => {
     let acconts = storage.getItemSync('acconts');
     if (typeof acconts === "undefined") {
         acconts = [];
+    }else{
+        const bytes = crypto.AES.decrypt(acconts , pass)
+        acconts =JSON.parse(bytes.toString(crypto.enc.Utf8)) 
     }
+    return acconts
+
+}
+
+const saveAccont = (acconts , pass) => {
+    console.log('save')
+    const accontsSave = crypto.AES.encrypt(JSON.stringify(acconts)  , pass).toString()
+    console.log('accont save = ' + accontsSave)
+    storage.setItemSync('acconts', accontsSave);
+}
+
+const setAcconts = accont => {
+    let acconts = fetchacconts(argv.masterPass)
+    
     acconts.push(accont);
-    storage.setItemSync('acconts', acconts);
+    saveAccont(acconts , argv.masterPass)
     return accont
 }
 
 const getAcconts = accontName => {
-    const acconts = storage.getItemSync('acconts')
+    const acconts = fetchacconts(argv.masterPass)
     let itemFind;
     acconts.forEach(element => {
         if(element.name === accontName){
@@ -68,14 +89,8 @@ const getAcconts = accontName => {
     });
 
     if(typeof itemFind !== 'undefined'){
-    const bytes = crypto.AES.decrypt(itemFind.password , argv.password)
-    const check = bytes.toString(crypto.enc.Utf8)
-    if( check !== ''){
-        itemFind.password = check
         return itemFind
     }else{
-        return undefined
-    }}else{
         return undefined
     }
     
@@ -83,21 +98,25 @@ const getAcconts = accontName => {
 
 
 if(command === 'set'){
-        let accont = setAcconts({
+     try   { let accont = setAcconts({
         name: argv.name,
         username : argv.username,
-        password : cryptMassage 
+        password : argv.password
     })
     console.log('accont added')
-    console.log(accont)
+    console.log(accont)} catch (error) {
+         console.log('set accont failed')
+    } 
 }else if(command === 'get'){
 
-    const itemFind = getAcconts(argv.name)
+    try{const itemFind = getAcconts(argv.name)
     if(typeof itemFind === 'undefined'){
         console.log('accont not found!')
     }else{
         console.log('accont found!')
         console.log(itemFind)
+    }}catch (error){
+        console.log('get accont failed!')
     }
 }
 
