@@ -1,6 +1,6 @@
 const storage = require('node-persist');
 const argv = require('yargs')
-.command('hello' , 'add accont' , item => {
+.command('set' , 'add accont' , item => {
     item.options({
         name:{
             demand : true,
@@ -22,19 +22,30 @@ const argv = require('yargs')
         }
     }).help('help')
 })
+.command('get' , 'get accont' , nameAccont => {
+    nameAccont.options({
+        name:{
+            demand : true,
+            alias : 'n',
+            description : 'enter the name of accont for find accont details',
+            type : 'string'
+        }
+    })
+})
 .help('help')
 .argv;
 
+let command = argv._[0];
+storage.initSync();
 
- storage.initSync();
-
-function setAcconts(accont) {
+const setAcconts = accont => {
     let acconts = storage.getItemSync('acconts');
     if (typeof acconts === "undefined") {
         acconts = [];
     }
     acconts.push(accont);
-     storage.setItemSync('acconts', acconts);
+    storage.setItemSync('acconts', acconts);
+    return accont
 }
 
 const getAcconts = accontName => {
@@ -45,20 +56,24 @@ const getAcconts = accontName => {
             itemFind = element
         }
     });
-    console.log(itemFind)
-    return itemFind
+    if(typeof itemFind === 'undefined'){
+        console.log('accont not found!')
+    }else{
+        console.log('accont found!')
+        console.log(itemFind)
+    }
 }
 
 
-if(argv._[0] === 'hello' && 
-typeof argv.name === "string" && 
-typeof argv.username === "string" &&
-typeof argv.password === 'number'){
-    setAcconts({
+if(command === 'set'){
+    let accont = setAcconts({
         name: argv.name,
         username : argv.username,
         password : argv.password
     })
+    console.log('accont added')
+    console.log(accont)
+}else if(command === 'get'){
+    getAcconts(argv.name)
 }
-getAcconts('Facebook')
-console.log(storage.getItemSync('acconts'))
+
