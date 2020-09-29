@@ -10,6 +10,7 @@
   "author": "mahdie ahmadi",
   "license": "ISC",
   "dependencies": {
+    "crypto-js": "^4.0.0",
     "node-persist": "0.0.11",
     "yargs": "^16.0.3"
   }
