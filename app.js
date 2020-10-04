@@ -65,9 +65,7 @@ const fetchacconts = pass => {
 }
 
 const saveAccont = (acconts , pass) => {
-    console.log('save')
     const accontsSave = crypto.AES.encrypt(JSON.stringify(acconts)  , pass).toString()
-    console.log('accont save = ' + accontsSave)
     storage.setItemSync('acconts', accontsSave);
 }
 
